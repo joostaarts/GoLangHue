@@ -1,10 +1,11 @@
 package bridgediscovery
 
 import (
-	"fmt"
 	"log"
 	"net"
 	"strings"
+
+	"github.com/joostaarts/GolangHue/pkg/networking"
 )
 
 const (
@@ -17,35 +18,48 @@ const (
 		"MX:3\r\n\r\n"
 )
 
-// Bridge holds information about found bridges in the network
-type Bridge struct {
-	ID       string
-	Location string
-	USN      string
-}
-
+var connections *networking.ConnectionContainer
 var bridges map[string]Bridge
+var bridgeFound chan Bridge
+
+func dispose() {
+	connections.Dispose()
+}
 
 // StartDiscovery initiates discovery of Hue bridges
 func StartDiscovery() {
+	connections = new(networking.ConnectionContainer)
 	bridges = make(map[string]Bridge)
-	// go listenForBridgeAdvertisements(multiCastAddressString)
+	go listenForBridgeAdvertisements(multiCastAddressString)
 	go discoverBridges()
 }
 
-func discoverBridges() {
-	con := openConnection()
-	defer con.Close()
-
-	sendMultiCastMessage(*con)
-
-	listenForReplies(con)
+func manageBridges() {
+	for {
+		bridge := <-bridgeFound
+		bridges[bridge.ID] = bridge
+	}
 }
 
-func openConnection() *net.UDPConn {
+func discoverBridges() {
+	bridgeFound = make(chan Bridge)
+
 	// Make sure we send out the broadcast from the right interface
-	localIP := getLocalIP() + ":0"
-	listenAddr, err := net.ResolveUDPAddr("udp", localIP)
+	localIPs := networking.GetLocalIPs()
+
+	for _, ip := range localIPs {
+		con := openConnection(ip)
+
+		connections.AddConnection(*con)
+
+		sendMultiCastMessage(*con)
+
+		go listenForReplies(con, &bridgeFound)
+	}
+}
+
+func openConnection(localIP string) *net.UDPConn {
+	listenAddr, err := net.ResolveUDPAddr("udp", localIP+":0")
 
 	if err != nil {
 		log.Panicf("Could not resolve listen address address %v, %v", localIP, err.Error())
@@ -78,7 +92,29 @@ func sendMultiCastMessage(con net.UDPConn) {
 	}
 }
 
-func listenForReplies(con *net.UDPConn) {
+func listenForBridgeAdvertisements(address string) {
+	listenIfs := networking.GetListenInterface()
+
+	for _, listenIf := range listenIfs {
+		addr, err := net.ResolveUDPAddr("udp", address)
+		if err != nil {
+			log.Panicf("Error resolving address %v, %v", address, err.Error())
+		}
+
+		l, err := net.ListenMulticastUDP("udp", &listenIf, addr)
+		if err != nil {
+			log.Panicf("Error listening for multicast, %v", err.Error())
+		}
+
+		connections.AddConnection(*l)
+
+		log.Printf("Listening on local address %v for broadcasts", l.LocalAddr())
+
+		go listenForReplies(l, &bridgeFound)
+	}
+}
+
+func listenForReplies(con *net.UDPConn, channel *chan Bridge) {
 
 	for {
 		b := make([]byte, maxDatagramSize)
@@ -96,80 +132,12 @@ func listenForReplies(con *net.UDPConn) {
 		bridge := new(Bridge)
 
 		for _, field := range split {
-			parseField(bridge, field)
+			bridge.parseField(field)
 		}
 
 		if bridge.ID != "" {
 			log.Printf("Bridge found, %v", bridge.Location)
-			bridges[bridge.ID] = *bridge
+			bridgeFound <- *bridge
 		}
 	}
-}
-
-func parseField(bridge *Bridge, field string) {
-	if strings.HasPrefix(field, "hue-bridgeid:") {
-		bridge.ID = readAttribute(field, "hue-bridgeid")
-	} else if strings.HasPrefix(field, "LOCATION:") {
-		bridge.Location = readAttribute(field, "LOCATION")
-	} else if strings.HasPrefix(field, "USN:") {
-		bridge.USN = readAttribute(field, "USN")
-	}
-}
-
-func listenForBridgeAdvertisements(address string) {
-	listenIf := getListenInterface()
-	fmt.Println(listenIf.Name)
-
-	addr, err := net.ResolveUDPAddr("udp", address)
-	if err != nil {
-		log.Panicf("Error resolving address %v, %v", address, err.Error())
-	}
-
-	l, err := net.ListenMulticastUDP("udp", &listenIf, addr)
-	if err != nil {
-		log.Panicf("Error listening for multicast, %v", err.Error())
-	}
-
-	log.Printf("Listening on local address %v for broadcasts", l.LocalAddr())
-
-	listenForReplies(l)
-}
-
-func readAttribute(fromString, attribute string) string {
-	result := strings.Replace(fromString, attribute+":", "", -1)
-	result = strings.Trim(result, " ")
-	return result
-}
-
-func getLocalIP() string {
-	addrs, err := net.InterfaceAddrs()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	for _, address := range addrs {
-		if ipnet, ok := address.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
-			if ipnet.IP.To4() != nil {
-				return ipnet.IP.String()
-			}
-		}
-	}
-	return ""
-}
-
-func getListenInterface() net.Interface {
-	ifs, err := net.Interfaces()
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	for _, i := range ifs {
-		log.Println(i)
-		if (i.Flags&net.FlagLoopback == 0) && (i.Flags&net.FlagUp == 1) {
-			return i
-		}
-	}
-
-	return ifs[0]
 }
