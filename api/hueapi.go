@@ -2,7 +2,8 @@ package hueapi
 
 import "net/http"
 
-type Light struct {
+func GetBridges(w http.ResponseWriter, r *http.Request) {
+
 }
 
 func GetLights(w http.ResponseWriter, r *http.Request) {
