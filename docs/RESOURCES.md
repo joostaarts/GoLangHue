@@ -24,3 +24,7 @@ Resulting in:
 ]
 
 ```
+
+## Really useful web site for converting JSON to Go classes
+
+https://app.quicktype.io/

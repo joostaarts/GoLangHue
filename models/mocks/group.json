@@ -1,0 +1,29 @@
+{
+    "name": "Woonkamer",
+    "lights": [
+        "6",
+        "7",
+        "8"
+    ],
+    "type": "Room",
+    "state": {
+        "all_on": false,
+        "any_on": false
+    },
+    "recycle": false,
+    "class": "Living room",
+    "action": {
+        "on": false,
+        "bri": 1,
+        "hue": 10778,
+        "sat": 251,
+        "effect": "none",
+        "xy": [
+            0.5609,
+            0.4042
+        ],
+        "ct": 500,
+        "alert": "none",
+        "colormode": "xy"
+    }
+}

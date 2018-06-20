@@ -1,0 +1,103 @@
+{
+    "name": "Philips Hue 014",
+    "zigbeechannel": 11,
+    "bridgeid": "001788FFFE796551",
+    "mac": "00:17:88:79:65:51",
+    "dhcp": true,
+    "ipaddress": "10.0.1.2",
+    "netmask": "255.255.255.0",
+    "gateway": "10.0.1.1",
+    "proxyaddress": "none",
+    "proxyport": 0,
+    "UTC": "2018-06-20T13:03:04",
+    "localtime": "2018-06-20T15:03:04",
+    "timezone": "Europe/Amsterdam",
+    "modelid": "BSB002",
+    "datastoreversion": "70",
+    "swversion": "1802201122",
+    "apiversion": "1.24.0",
+    "swupdate": {
+        "updatestate": 0,
+        "checkforupdate": false,
+        "devicetypes": {
+            "bridge": false,
+            "lights": [],
+            "sensors": []
+        },
+        "url": "",
+        "text": "",
+        "notify": true
+    },
+    "swupdate2": {
+        "checkforupdate": false,
+        "lastchange": "2018-06-18T08:05:13",
+        "bridge": {
+            "state": "noupdates",
+            "lastinstall": "2018-06-16T20:27:54"
+        },
+        "state": "noupdates",
+        "autoinstall": {
+            "updatetime": "T14:00:00",
+            "on": false
+        }
+    },
+    "linkbutton": true,
+    "portalservices": true,
+    "portalconnection": "connected",
+    "portalstate": {
+        "signedon": true,
+        "incoming": false,
+        "outgoing": true,
+        "communication": "disconnected"
+    },
+    "internetservices": {
+        "internet": "connected",
+        "remoteaccess": "connected",
+        "time": "connected",
+        "swupdate": "connected"
+    },
+    "factorynew": false,
+    "replacesbridgeid": null,
+    "backup": {
+        "status": "idle",
+        "errorcode": 0
+    },
+    "starterkitid": "",
+    "whitelist": {
+        "AzGFfuwEUUUtlZwJ49ugDAAYPCtLHR3HtQQGpC3d": {
+            "last use date": "2017-10-30T11:40:21",
+            "create date": "2017-09-07T12:12:51",
+            "name": "CLIP API Debugger"
+        },
+        "McVl5bfq30m7fxIWaFRtl0PV6X8QJ4QnLvL9nv9q": {
+            "last use date": "2017-10-25T15:36:00",
+            "create date": "2017-09-07T12:21:24",
+            "name": "Hue 2#Samsung SM-G930F"
+        },
+        "gAREwDRGKVhQOUm1FMqi0-A6gyPTnMBmMXLnboGv": {
+            "last use date": "2017-10-25T15:53:27",
+            "create date": "1980-01-02T15:16:30",
+            "name": "CLIP API Debugger"
+        },
+        "klkmigDSYwBOlAHSdgdsJEd2uXi1wtGoIIWCjAlN": {
+            "last use date": "2017-10-25T15:36:00",
+            "create date": "2017-10-25T15:22:13",
+            "name": "huelabs2"
+        },
+        "89s1DZWCVkevoe58I69D1v9LbC528ZkJldhjOrH3": {
+            "last use date": "2018-06-16T20:42:53",
+            "create date": "2018-06-16T20:21:47",
+            "name": "Hue 3#Samsung SM-G930F"
+        },
+        "DBwNAqZjbwimWbWAJAIh1LsMei9mqfizO3StrHPH": {
+            "last use date": "2018-06-19T14:14:45",
+            "create date": "2018-06-18T07:21:54",
+            "name": "Hue 3#Samsung SM-G930F"
+        },
+        "Tn16atddoLYfDGUvLJlP7cqsdGQeG4ectFLxJ3c-": {
+            "last use date": "2018-06-20T13:03:04",
+            "create date": "2018-06-19T13:36:41",
+            "name": "my_hue_app#iphone peter"
+        }
+    }
+}
