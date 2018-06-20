@@ -2,17 +2,17 @@ package models
 
 import "encoding/json"
 
-func UnmarshalZigbeeConfiguration(data []byte) (ZigbeeConfiguration, error) {
-	var r ZigbeeConfiguration
+func UnmarshalBridgeConfiguration(data []byte) (BridgeConfiguration, error) {
+	var r BridgeConfiguration
 	err := json.Unmarshal(data, &r)
 	return r, err
 }
 
-func (r *ZigbeeConfiguration) Marshal() ([]byte, error) {
+func (r *BridgeConfiguration) Marshal() ([]byte, error) {
 	return json.Marshal(r)
 }
 
-type ZigbeeConfiguration struct {
+type BridgeConfiguration struct {
 	Name             string               `json:"name"`
 	ZigbeeChannel    int64                `json:"zigbeechannel"`
 	BridgeID         string               `json:"bridgeid"`

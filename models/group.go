@@ -2,17 +2,17 @@ package models
 
 import "encoding/json"
 
-func UnmarshalBridgeConfiguration(data []byte) (BridgeConfiguration, error) {
-	var r BridgeConfiguration
+func UnmarshalGroup(data []byte) (Group, error) {
+	var r Group
 	err := json.Unmarshal(data, &r)
 	return r, err
 }
 
-func (r *BridgeConfiguration) Marshal() ([]byte, error) {
+func (r *Group) Marshal() ([]byte, error) {
 	return json.Marshal(r)
 }
 
-type BridgeConfiguration struct {
+type Group struct {
 	Name    string   `json:"name"`
 	Lights  []string `json:"lights"`
 	Type    string   `json:"type"`
