@@ -5,13 +5,13 @@ import (
 )
 
 // Bridge holds information about found bridges in the network
-type Bridge struct {
+type BridgeInfo struct {
 	ID       string
 	Location string
 	USN      string
 }
 
-func (bridge *Bridge) parseField(field string) {
+func (bridge *BridgeInfo) parseField(field string) {
 	if strings.HasPrefix(field, "hue-bridgeid:") {
 		bridge.ID = readAttribute(field, "hue-bridgeid")
 	} else if strings.HasPrefix(field, "LOCATION:") {

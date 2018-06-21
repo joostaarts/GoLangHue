@@ -72,11 +72,11 @@ type Swupdate struct {
 }
 
 type Swupdate2 struct {
-	CheckForUpdate bool        `json:"checkforupdate"`
-	LastChange     string      `json:"lastchange"`
-	Bridge         Bridge      `json:"bridge"`
-	State          string      `json:"state"`
-	Autoinstall    Autoinstall `json:"autoinstall"`
+	CheckForUpdate bool         `json:"checkforupdate"`
+	LastChange     string       `json:"lastchange"`
+	Bridge         InstallState `json:"bridge"`
+	State          string       `json:"state"`
+	Autoinstall    Autoinstall  `json:"autoinstall"`
 }
 
 type Autoinstall struct {
@@ -84,7 +84,7 @@ type Autoinstall struct {
 	On         bool   `json:"on"`
 }
 
-type Bridge struct {
+type InstallState struct {
 	State       string `json:"state"`
 	LastInstall string `json:"lastinstall"`
 }

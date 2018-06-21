@@ -1,10 +1,16 @@
 package bridgediscovery
 
 import (
+	"encoding/xml"
+	"io/ioutil"
 	"log"
 	"net"
+	"net/http"
 	"strings"
+	"sync"
+	"time"
 
+	"github.com/joostaarts/GolangHue/models"
 	"github.com/joostaarts/GolangHue/pkg/networking"
 )
 
@@ -19,8 +25,8 @@ const (
 )
 
 var connections *networking.ConnectionContainer
-var bridges map[string]Bridge
-var bridgeFound chan Bridge
+var bridges map[string]models.Bridge
+var mutex sync.Mutex
 
 func dispose() {
 	connections.Dispose()
@@ -29,21 +35,36 @@ func dispose() {
 // StartDiscovery initiates discovery of Hue bridges
 func StartDiscovery() {
 	connections = new(networking.ConnectionContainer)
-	bridges = make(map[string]Bridge)
+	bridges = make(map[string]models.Bridge)
+
 	go listenForBridgeAdvertisements(multiCastAddressString)
 	go discoverBridges()
 }
 
-func manageBridges() {
-	for {
-		bridge := <-bridgeFound
-		bridges[bridge.ID] = bridge
+func resolveBridge(bridgeInfo *BridgeInfo) {
+	resp, err := http.Get(bridgeInfo.Location)
+
+	if err != nil {
+		log.Println(err)
+		return
 	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	var b models.Root
+
+	err2 := xml.Unmarshal(body, &b)
+	// log.Print(string(body))
+
+	if err2 != nil {
+		log.Fatal(err2)
+	}
+
+	mutex.Lock()
+	defer mutex.Unlock()
+	bridges[bridgeInfo.ID] = b.Device
 }
 
 func discoverBridges() {
-	bridgeFound = make(chan Bridge)
-
 	// Make sure we send out the broadcast from the right interface
 	localIPs := networking.GetLocalIPs()
 
@@ -54,7 +75,7 @@ func discoverBridges() {
 
 		sendMultiCastMessage(*con)
 
-		go listenForReplies(con, &bridgeFound)
+		go listenForReplies(con)
 	}
 }
 
@@ -110,34 +131,63 @@ func listenForBridgeAdvertisements(address string) {
 
 		log.Printf("Listening on local address %v for broadcasts", l.LocalAddr())
 
-		go listenForReplies(l, &bridgeFound)
+		go listenForReplies(l)
 	}
 }
 
-func listenForReplies(con *net.UDPConn, channel *chan Bridge) {
+func listenForReplies(con *net.UDPConn) {
+	con.SetDeadline(time.Now().Add(10 * time.Second))
 
 	for {
 		b := make([]byte, maxDatagramSize)
 
-		bytesRead, _, err := con.ReadFromUDP(b)
+		n, err := con.Read(b)
+
 		if err != nil {
+			if operror, ok := err.(*net.OpError); ok {
+				if e, ok := operror.Err.(net.Error); !ok || e.Timeout() {
+					connections.CloseConnection(con)
+					return
+				}
+			}
+
 			log.Fatal("ReadFromUDP failed:", err)
 		}
 
 		// Convert to string and ignore part of the slice that contains no data
-		s := string(b[0 : bytesRead-1])
+		bytesRead := b[0 : n-1]
 
-		split := strings.Split(s, "\r\n")
-
-		bridge := new(Bridge)
-
-		for _, field := range split {
-			bridge.parseField(field)
-		}
-
-		if bridge.ID != "" {
-			log.Printf("Bridge found, %v", bridge.Location)
-			bridgeFound <- *bridge
+		bridge := processResponse(&bytesRead)
+		if bridge != nil {
+			go resolveBridge(bridge)
 		}
 	}
+}
+
+func processResponse(b *[]byte) *BridgeInfo {
+	s := string(*b)
+	split := strings.Split(s, "\r\n")
+
+	bridge := new(BridgeInfo)
+
+	for _, field := range split {
+		bridge.parseField(field)
+	}
+
+	if bridge.ID != "" {
+		log.Printf("Bridge found, %v", bridge.Location)
+		return bridge
+	}
+
+	return nil
+}
+
+func GetBridges() []models.Bridge {
+	values := []models.Bridge{}
+
+	for _, value := range bridges {
+		values = append(values, value)
+	}
+
+	return values
 }
