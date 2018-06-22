@@ -7,18 +7,21 @@ type Root struct {
 }
 
 type Bridge struct {
-	DeviceType       string   `json:"deviceType" xml:"deviceType"`
-	FriendlyName     string   `json:"friendlyName" xml:"friendlyName"`
-	Manufacturer     string   `json:"manufacturer" xml:"manufacturer"`
-	ManufacturerURL  string   `json:"manufacturerURL" xml:"manufacturerURL"`
-	ModelDescription string   `json:"modelDescription" xml:"modelDescription"`
-	ModelName        string   `json:"modelName" xml:"modelName"`
-	ModelNumber      string   `json:"modelNumber" xml:"modelNumber"`
-	ModelURL         string   `json:"modelURL" xml:"modelURL"`
-	SerialNumber     string   `json:"serialNumber" xml:"serialNumber"`
-	Udn              string   `json:"UDN" xml:"UDN"`
-	PresentationURL  string   `json:"presentationURL" xml:"presentationURL"`
-	IconList         IconList `json:"iconList" xml:"iconList"`
+	DeviceType       string      `json:"devicetype" xml:"deviceType"`
+	FriendlyName     string      `json:"friendlyname" xml:"friendlyName"`
+	Name             string      `json:"name"`
+	Manufacturer     string      `json:"manufacturer" xml:"manufacturer"`
+	ManufacturerURL  string      `json:"manufacturerurl" xml:"manufacturerURL"`
+	ModelDescription string      `json:"modeldescription" xml:"modelDescription"`
+	ModelName        string      `json:"modelname" xml:"modelName"`
+	ModelNumber      string      `json:"modelnumber" xml:"modelNumber"`
+	ModelURL         string      `json:"modelurl" xml:"modelURL"`
+	SerialNumber     string      `json:"serialnumber" xml:"serialNumber"`
+	Udn              string      `json:"udn" xml:"UDN"`
+	PresentationURL  string      `json:"presentationurl" xml:"presentationURL"`
+	IconList         IconList    `json:"iconlist" xml:"iconList"`
+	URLBase          string      `json:"urlbase" xml:"URLBase"`
+	SmallConfig      SmallConfig `json:"smallconfig"`
 }
 
 type IconList struct {

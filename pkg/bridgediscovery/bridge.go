@@ -9,6 +9,7 @@ type BridgeInfo struct {
 	ID       string
 	Location string
 	USN      string
+	URLBase  string
 }
 
 func (bridge *BridgeInfo) parseField(field string) {
@@ -16,6 +17,8 @@ func (bridge *BridgeInfo) parseField(field string) {
 		bridge.ID = readAttribute(field, "hue-bridgeid")
 	} else if strings.HasPrefix(field, "LOCATION:") {
 		bridge.Location = readAttribute(field, "LOCATION")
+	} else if strings.HasPrefix(field, "URLBase:") {
+		bridge.URLBase = readAttribute(field, "URLBase")
 	} else if strings.HasPrefix(field, "USN:") {
 		bridge.USN = readAttribute(field, "USN")
 	}

@@ -1,6 +1,7 @@
 package bridgediscovery
 
 import (
+	"encoding/json"
 	"encoding/xml"
 	"io/ioutil"
 	"log"
@@ -32,6 +33,12 @@ func dispose() {
 	connections.Dispose()
 }
 
+func handleErr(err error) {
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
 // StartDiscovery initiates discovery of Hue bridges
 func StartDiscovery() {
 	connections = new(networking.ConnectionContainer)
@@ -53,7 +60,23 @@ func resolveBridge(bridgeInfo *BridgeInfo) {
 	var b models.Root
 
 	err2 := xml.Unmarshal(body, &b)
-	// log.Print(string(body))
+
+	handleErr(err2)
+
+	b.Device.URLBase = b.URLBase
+
+	resp2, err := http.Get(b.URLBase + "api/config")
+	handleErr(err)
+
+	body, err = ioutil.ReadAll(resp2.Body)
+	handleErr(err)
+
+	var smallconfig models.SmallConfig
+	err2 = json.Unmarshal(body, &smallconfig)
+	handleErr(err2)
+
+	b.Device.Name = smallconfig.Name
+	b.Device.SmallConfig = smallconfig
 
 	if err2 != nil {
 		log.Fatal(err2)
