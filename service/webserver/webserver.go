@@ -15,6 +15,7 @@ func Startup() {
 	router := mux.NewRouter()
 	router.HandleFunc("/api/lights", hueapi.GetLights).Methods("GET")
 	router.HandleFunc("/api/bridges", hueapi.GetBridges).Methods("GET")
+	router.HandleFunc("/api/bridges/{bridgeID}/connect", hueapi.ConnectBridge).Methods("GET")
 	log.Fatal(http.ListenAndServe(":9000", router))
 }
 
